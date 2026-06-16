@@ -2,9 +2,9 @@ name: CI/CD - Build, Push, and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   PROJECT_ID: cloud-internship-2025-499007
