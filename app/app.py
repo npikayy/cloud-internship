@@ -5,7 +5,7 @@ app = Flask(__name__)
 # Route cho trang chủ
 @app.route('/')
 def home():
-    return render_template('app/templates/index.html')
+    return render_template('index.html')
 
 # Route cho từng tuần
 @app.route('/week1')
