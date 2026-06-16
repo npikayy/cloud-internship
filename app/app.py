@@ -10,21 +10,21 @@ def home():
 # Route cho từng tuần
 @app.route('/week1')
 def week1():
-    return render_template('app/templates/week1.html')
+    return render_template('week1.html')
 
 @app.route('/week2')
 def week2():
-    return render_template('app/templates/week2.html')
+    return render_template('week2.html')
 
 @app.route('/week3')
 def week3():
-    return render_template('app/templates/week3.html')
+    return render_template('week3.html')
 
 @app.route('/week4')
 def week4():
-    return render_template('app/templates/week4.html')
+    return render_template('week4.html')
 
-# Health check endpoint cho Cloud Run
+# Health check endpoint for Cloud Run
 @app.route('/health')
 def health():
     return {'status': 'healthy', 'message': 'Server is running'}
