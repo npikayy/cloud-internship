@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuần 1: Docker + GCP Foundations | Cloud Engineer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: #1a2c3e;
+            line-height: 1.5;
+        }
+        .header {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4a6f 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header h2 { font-size: 1.3rem; }
+        .header h2 i { margin-right: 8px; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+        .week-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .week-title h3 { font-size: 1.3rem; color: #1a4a6f; }
+        .week-title p { font-size: 0.8rem; color: #6c7a89; margin-top: 0.2rem; }
+        .progress-info { text-align: right; }
+        .progress-bar-big {
+            width: 200px;
+            background: #e0e7ed;
+            border-radius: 20px;
+            height: 8px;
+            margin-top: 0.5rem;
+        }
+        .progress-fill-big {
+            background: #2c7da0;
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+        }
+        .days-list { display: flex; flex-direction: column; gap: 1rem; }
+        .day-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #2c7da0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .day-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+        .day-num { font-size: 0.7rem; background: #e3f0f7; padding: 0.2rem 0.7rem; border-radius: 20px; color: #2c7da0; }
+        .day-title { font-size: 1.1rem; font-weight: 700; color: #1a2c3e; }
+        .status { font-size: 1.2rem; }
+        .status.completed { color: #28a47e; }
+        .status.pending { color: #cbd5e1; }
+        .output { font-size: 0.8rem; color: #2c7da0; margin: 0.5rem 0; background: #f0f7fb; padding: 0.3rem 0.8rem; border-radius: 20px; display: inline-block; }
+        .preview-steps { font-size: 0.8rem; color: #6c7a89; margin-top: 0.5rem; padding-left: 0.5rem; border-left: 2px solid #dce5ec; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            max-width: 550px;
+            width: 90%;
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .close-modal { font-size: 1.5rem; cursor: pointer; color: #6c7a89; }
+        .steps-list { margin: 1rem 0; padding-left: 1.2rem; }
+        .steps-list li { margin: 0.5rem 0; font-size: 0.9rem; }
+        .btn-complete {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            margin-top: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+        }
+        footer { text-align: center; padding: 1.5rem; font-size: 0.75rem; color: #6c7a89; }
+        @media (max-width: 700px) {
+            .week-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .progress-info { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2><i class="fab fa-docker"></i> Tuần 1: Docker + GCP Foundations</h2>
+    <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+</div>
+
+<div class="container">
+    <div class="week-header">
+        <div class="week-title">
+            <h3>📅 Ngày 1-5: Nền tảng Docker và GCP</h3>
+            <p>Thiết lập GCP, Docker cơ bản nâng cao, Cloud Run, Networking</p>
+        </div>
+        <div class="progress-info">
+            <div>Tiến độ tuần</div>
+            <div class="progress-bar-big"><div class="progress-fill-big" id="weekFill"></div></div>
+            <div style="font-size: 0.75rem;" id="progressText">0/5 ngày</div>
+        </div>
+    </div>
+
+    <div class="days-list" id="daysList"></div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle"></h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div id="modalBody"></div>
+        <button class="btn-complete" id="completeBtn">✓ Đánh dấu hoàn thành</button>
+    </div>
+</div>
+
+<footer><i class="fas fa-save"></i> Click vào từng ngày để xem chi tiết các bước thực hiện</footer>
+
+<script>
+    const weekData = [
+        {
+            day: 1, title: "GCP Setup & IAM Basics",
+            output: "GCP project sẵn sàng với service account deploy-ready",
+            steps: [
+                "Tạo GCP project mới, ghi nhớ Project ID",
+                "Thiết lập billing cho project (nếu chưa có)",
+                "Enable các API: Compute Engine, Cloud Run, Artifact Registry, Cloud Logging",
+                "Tạo service account cho deployment với roles: Cloud Run Admin, Service Account User, Artifact Registry Writer",
+                "Tạo và tải JSON key của service account",
+                "Cài đặt gcloud CLI và xác thực bằng service account",
+                "Thiết lập budget alert ở mức $10 và $50",
+                "Kiểm tra kết nối: gcloud projects describe [PROJECT_ID]"
+            ],
+            details: "Mục tiêu: Có một GCP project hoàn chỉnh, sẵn sàng deploy, hiểu được IAM cơ bản."
+        },
+        {
+            day: 2, title: "Docker Fundamentals",
+            output: "Ứng dụng chạy được trong Docker container local",
+            steps: [
+                "Cài đặt Docker Desktop (Windows/Mac) hoặc Docker Engine (Linux)",
+                "Viết một ứng dụng API đơn giản (Python Flask hoặc Node Express)",
+                "Tạo Dockerfile: xác định base image, copy source code, cài dependencies, expose port",
+                "Tạo .dockerignore để loại trừ node_modules, .git, logs",
+                "Build image: lưu ý đến tag image",
+                "Chạy container, map port từ host vào container",
+                "Kiểm tra API hoạt động qua browser hoặc curl",
+                "Debug lỗi thường gặp: port conflict, missing dependencies, permission denied"
+            ],
+            details: "Hiểu image vs container, Docker layer caching, cách debug container."
+        },
+        {
+            day: 3, title: "Advanced Docker & Artifact Registry",
+            output: "Docker images có version được lưu trên Artifact Registry",
+            steps: [
+                "Tạo Artifact Registry repository với định dạng Docker",
+                "Nâng cấp Dockerfile thành multi-stage build để tối ưu kích thước image",
+                "Thiết lập chiến lược versioning: sử dụng version numbers, commit hash, và latest tag",
+                "Xác thực với Artifact Registry bằng gcloud hoặc key JSON",
+                "Tag image đúng format: [REGION]-docker.pkg.dev/[PROJECT]/[REPO]/[IMAGE]:[TAG]",
+                "Push image lên Artifact Registry",
+                "Pull image từ registry về máy local để kiểm tra",
+                "Kiểm tra danh sách images và tags trên GCP Console"
+            ],
+            details: "Quản lý container images chuyên nghiệp, versioning rõ ràng."
+        },
+        {
+            day: 4, title: "Deploy Containers to Cloud Run",
+            output: "Cloud Run service public đang chạy",
+            steps: [
+                "Xác định image đã push từ Artifact Registry",
+                "Deploy lên Cloud Run qua CLI hoặc Console",
+                "Cấu hình: region, CPU, memory, min/max instances",
+                "Thiết lập environment variables cho ứng dụng",
+                "Xử lý secrets: sử dụng Secret Manager hoặc environment variables tạm thời",
+                "Kiểm tra service URL sau khi deploy",
+                "Debug lỗi permission: kiểm tra service account của Cloud Run",
+                "Xem logs để troubleshoot runtime errors",
+                "Update revision với image mới, kiểm tra revision history"
+            ],
+            details: "Hiểu execution model của Cloud Run, auto-scaling, revision management."
+        },
+        {
+            day: 5, title: "Networking Basics & Compute Engine",
+            output: "VM trong VPC custom với firewall rules đúng",
+            steps: [
+                "Tạo VPC custom với subnet và IP range cụ thể (ví dụ 10.10.0.0/24)",
+                "Thiết lập firewall rules: cho phép SSH (22) từ IP nhà hoặc dải IP an toàn",
+                "Thêm firewall rule cho HTTP (80) hoặc HTTPS (443) nếu cần",
+                "Deploy Compute Engine VM trong VPC vừa tạo, chọn region phù hợp",
+                "SSH vào VM qua gcloud compute ssh hoặc browser SSH",
+                "Cài đặt web server (nginx, apache) trên VM",
+                "Kiểm tra kết nối HTTP từ browser",
+                "Vẽ network diagram: VPC, subnet, firewall rules, VM placement",
+                "Document các access rules và lý do thiết lập"
+            ],
+            details: "Phân biệt Cloud Run networking và VM networking, hiểu VPC, subnets."
+        }
+    ];
+
+    const STORAGE_KEY = "week1_data";
+    let completed = new Array(5).fill(false);
+
+    function loadData() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const arr = JSON.parse(stored);
+                if (arr.length === 5) completed = arr;
+            } catch(e) {}
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(completed));
+        updateWeekProgress();
+        // Trigger storage event cho index.html
+        window.dispatchEvent(new Event('storage'));
+    }
+
+    function updateWeekProgress() {
+        const completedCount = completed.filter(v => v === true).length;
+        const percent = (completedCount / 5) * 100;
+        document.getElementById('weekFill').style.width = percent + '%';
+        document.getElementById('progressText').innerText = `${completedCount}/5 ngày`;
+    }
+
+    function renderDays() {
+        const container = document.getElementById('daysList');
+        container.innerHTML = '';
+        weekData.forEach((day, idx) => {
+            const isCompleted = completed[idx];
+            const card = document.createElement('div');
+            card.className = 'day-card';
+            card.innerHTML = `
+                <div class="day-header">
+                    <div><span class="day-num">Ngày ${day.day}</span> <span class="day-title">${day.title}</span></div>
+                    <div class="status ${isCompleted ? 'completed' : 'pending'}">${isCompleted ? '✓' : '○'}</div>
+                </div>
+                <div><span class="output"><i class="fas fa-flag-checkered"></i> Output: ${day.output}</span></div>
+                <div class="preview-steps"><i class="fas fa-list"></i> ${day.steps.length} bước thực hiện</div>
+            `;
+            card.addEventListener('click', () => openModal(idx));
+            container.appendChild(card);
+        });
+    }
+
+    let currentModalIdx = null;
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const completeBtn = document.getElementById('completeBtn');
+
+    function openModal(idx) {
+        currentModalIdx = idx;
+        const day = weekData[idx];
+        const isCompleted = completed[idx];
+        modalTitle.innerHTML = `<i class="fas fa-calendar-day"></i> Ngày ${day.day}: ${day.title}`;
+        modalBody.innerHTML = `
+            <div style="background: #eef2fa; padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
+                <strong><i class="fas fa-bullseye"></i> Output mong đợi:</strong><br>${day.output}
+            </div>
+            <div style="background: #f8f9fa; padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
+                <strong><i class="fas fa-info-circle"></i> Chi tiết:</strong><br>${day.details}
+            </div>
+            <strong><i class="fas fa-check-double"></i> Các bước thực hiện:</strong>
+            <ul class="steps-list">
+                ${day.steps.map(step => `<li>📌 ${step}</li>`).join('')}
+            </ul>
+        `;
+        completeBtn.innerText = isCompleted ? '↺ Đánh dấu chưa hoàn thành' : '✓ Đánh dấu hoàn thành';
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        currentModalIdx = null;
+    }
+
+    function toggleComplete() {
+        if (currentModalIdx !== null) {
+            completed[currentModalIdx] = !completed[currentModalIdx];
+            saveData();
+            renderDays();
+            closeModal();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        renderDays();
+        updateWeekProgress();
+        document.querySelector('.close-modal').addEventListener('click', closeModal);
+        completeBtn.addEventListener('click', toggleComplete);
+        window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    });
+</script>
+</body>
+</html>
